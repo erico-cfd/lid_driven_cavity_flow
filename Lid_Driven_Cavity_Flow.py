@@ -15,7 +15,7 @@ Ly = 1.0
 Nx = 50
 Ny = 50
 
-# SOR, definição de omega
+# SOR !
 
 omega = 1.5
 
@@ -43,8 +43,7 @@ v_star = np.copy(v)
 
 t = 0.0
 
-
-# print(u)
+# Bellow is the code to calculate most properties of the flow, Numba was used to speed this up, you can just remove it if you dont want it. (remove njit)
 
 ##########################################################################################
 
@@ -159,6 +158,8 @@ def corrigir_v(v, v_star, p, Nx, Ny, dy, dt):
         for j in range(1,Ny):
             v[i,j]= v_star[i,j] - dt * (p[i,j] - p[i,j-1])/dy
     return v
+
+# This block calculates stream function, uncomment it if you want it, but I'll warn you, this makes the code painfully slow.
 """   
 def calcular_stream_function(u, v, Nx, Ny, dx, dy, tol, omega):
     psi = np.zeros((Nx+1,Ny+1))
@@ -199,6 +200,7 @@ vplot = np.zeros((Nx+1, Ny+1), float)
 vel_mag = np.zeros((Nx+1, Ny+1), float)
 
 # Compute averaged velocities and velocity magnitude
+
 for i in range(0, Nx+1):
     for j in range(0, Ny+1):
         uplot[i, j] = 0.5 * (u[i, j] + u[i, j-1])
@@ -208,17 +210,17 @@ for j in range(0, Ny):
     vel_mag[Nx,j]=0
 
 
-print(time.time()-inicio) # Printa o tempo final de simulação
+print(time.time()-inicio) #Print final time for the simulation
 
 
 
 
-X, Y = np.meshgrid(x,y, indexing='ij')  # Index i e j para ficar igual aos arrays
+X, Y = np.meshgrid(x,y, indexing='ij')  # Index i e j to match arrays
 
 
-# Plotando os resultados:
+# Plotting the results:
 
-################ Plot velocidade
+################ Plot vlocity
 
 
 contour = plt.contourf(X, Y, vel_mag, 100, cmap='jet') 
@@ -231,8 +233,8 @@ plt.streamplot(
     linewidth=0.8
 )
 
-plt.colorbar(contour, label='Magnitude do Vetor velocidade')
-plt.title('Campo de velocidade (Malha {}x{}) - Re = {}'.format(Nx, Ny, Re))
+plt.colorbar(contour, label='Velocity vector magnitude')
+plt.title('Velocity field (mesh {}x{}) - Re = {}'.format(Nx, Ny, Re))
 plt.xlabel('x')
 plt.ylabel('y')
 plt.axis('equal')
@@ -240,7 +242,7 @@ plt.tight_layout()
 plt.show()
 
 
-############## Plot pressao
+############## Plot pressure
 """
 p -= np.mean(p)
 
@@ -252,7 +254,7 @@ lim = max(abs(vmin), abs(vmax))
 contour = plt.contourf(X, Y, p[:-1,:-1], 100, cmap='seismic', vmin=-lim, vmax=lim)
 plt.colorbar(contour, label='Pressão')
 
-plt.title('Campo de Pressão (Malha {}x{}) - Re = {}'.format(Nx, Ny, Re))
+plt.title('Pressure field (mesh {}x{}) - Re = {}'.format(Nx, Ny, Re))
 plt.xlabel('x')
 plt.ylabel('y')
 plt.axis('equal')
@@ -262,7 +264,8 @@ plt.show()
 
 """
 """
-################# Vorticidade
+################# Vorticity - Uncomment if and only if this insterests you.
+
 # Calcular vorticidade
 omega = np.zeros((Nx+1, Ny+1))
 
@@ -272,13 +275,13 @@ for i in range(1, Nx):
         dvdx = (vplot[i+1, j] - vplot[i-1, j]) / (2*dx)
         omega[i, j] = dvdx - dudy
 
-# zerar bordas (ou deixar como NaN)
+# zeroing boundary
 omega[0, :] = 0
 omega[-1, :] = 0
 omega[:, 0] = 0
 omega[:, -1] = 0
 
-# Plot da vorticidade
+# Plot 
 plt.figure(figsize=(8,6))
 contour = plt.contourf(X, Y, omega, 100, cmap='magma')
 plt.colorbar(contour, label='Vorticidade')
@@ -288,4 +291,5 @@ plt.ylabel('y')
 plt.axis('equal')
 plt.tight_layout()
 plt.show()
+
 """
